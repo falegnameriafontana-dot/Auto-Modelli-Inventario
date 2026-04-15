@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: carModels
+    // Document ID: auto-generated
+    // Fields:
+    //   - brand: string (required)
+    //   - model: string (required)
+    //   - scale: string (required)
+    //   - color: string (optional)
+    //   - condition: string (optional)
+    //   - notes: string (optional)
+    //   - imageUrl: string (optional)
+    //   - userId: string (required, immutable)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidCarModel(data) {
+      return data.brand is string && data.brand.size() > 0 && data.brand.size() < 100 &&
+             data.model is string && data.model.size() > 0 && data.model.size() < 100 &&
+             data.scale is string && data.scale.size() > 0 && data.scale.size() < 20 &&
+             (!('year' in data) || (data.year is string && data.year.size() < 10)) &&
+             (!('color' in data) || (data.color is string && data.color.size() < 50)) &&
+             (!('condition' in data) || (data.condition is string && data.condition.size() < 50)) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() < 1000)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1048576)) &&
+             data.userId == request.auth.uid &&
+             data.createdAt is timestamp;
+    }
+
+    match /carModels/{carModelId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidCarModel(request.resource.data);
+      allow update: if isAuthenticated() && 
+                      resource.data.userId == request.auth.uid && 
+                      isValidCarModel(request.resource.data) &&
+                      request.resource.data.userId == resource.data.userId &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

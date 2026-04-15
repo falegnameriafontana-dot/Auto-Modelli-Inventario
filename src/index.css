@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+body {
+  @apply relative min-h-screen;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=1920');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.3; /* 70% trasparenza = 30% opacità */
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Ensure the print view is hidden by default */
+#print-view {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+
+  /* Reset global containers for clean multi-page printing */
+  html, body, #root {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    background: white !important;
+    color: black !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Show the print view during printing */
+  #print-view {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    background: white !important;
+    color: black !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+
+  /* Hide background image */
+  body::before {
+    display: none !important;
+  }
+
+  /* Disable animations for print */
+  * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  /* Force page breaks for items */
+  .break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

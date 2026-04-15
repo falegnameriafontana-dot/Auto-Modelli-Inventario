@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "CarModel": {
+      "title": "CarModel",
+      "description": "Un modellino di auto nella collezione.",
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "Marca dell'auto (es. Ferrari, Porsche)"
+        },
+        "model": {
+          "type": "string",
+          "description": "Modello dell'auto (es. F40, 911)"
+        },
+        "scale": {
+          "type": "string",
+          "description": "Scala del modellino (es. 1:18, 1:43)"
+        },
+        "year": {
+          "type": "string",
+          "description": "Anno di produzione del modellino"
+        },
+        "color": {
+          "type": "string",
+          "description": "Colore del modellino"
+        },
+        "condition": {
+          "type": "string",
+          "description": "Stato del modellino (es. Nuovo, Usato, Con scatola)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Note aggiuntive"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL dell'immagine del modellino"
+        },
+        "userId": {
+          "type": "string",
+          "description": "ID dell'utente proprietario"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data di creazione"
+        }
+      },
+      "required": ["brand", "model", "scale", "userId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/carModels/{carModelId}": {
+      "schema": "CarModel",
+      "description": "Collezione globale dei modellini di auto."
+    }
+  }
+}

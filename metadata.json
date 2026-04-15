@@ -1,0 +1,7 @@
+{
+  "name": "AutoModel Inventory",
+  "description": "Un'applicazione per gestire e catalogare la tua collezione di modellini di auto.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
