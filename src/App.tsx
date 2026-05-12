@@ -146,7 +146,6 @@ export default function App() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [editingModel, setEditingModel] = useState<CarModel | null>(null);
-  const [isSearchingImage, setIsSearchingImage] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -324,38 +323,14 @@ export default function App() {
     setIsModalOpen(true);
   };
 
-  const searchImage = async () => {
+  const searchImage = () => {
     if (!formData.brand || !formData.model) {
       alert("Inserisci marca e modello per cercare un'immagine.");
       return;
     }
 
-    setIsSearchingImage(true);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-      
-      const prompt = `Trova un URL di un'immagine pubblica di alta qualità per un modellino di auto: ${formData.brand} ${formData.model} ${formData.scale}. Rispondi solo con l'URL dell'immagine, niente altro. Se non trovi nulla di specifico, usa una foto generica di un'auto simile.`;
-      
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt
-      });
-      const url = result.text.trim();
-      
-      if (url.startsWith('http')) {
-        setFormData(prev => ({ ...prev, imageUrl: url }));
-      } else {
-        // Fallback to picsum if Gemini fails to provide a clean URL
-        const fallbackUrl = `https://picsum.photos/seed/${formData.brand}-${formData.model}/800/600`;
-        setFormData(prev => ({ ...prev, imageUrl: fallbackUrl }));
-      }
-    } catch (error) {
-      console.error("Image search failed", error);
-      const fallbackUrl = `https://picsum.photos/seed/${formData.brand}-${formData.model}/800/600`;
-      setFormData(prev => ({ ...prev, imageUrl: fallbackUrl }));
-    } finally {
-      setIsSearchingImage(false);
-    }
+    const searchQuery = encodeURIComponent(`${formData.brand} ${formData.model} ${formData.scale} modellino auto`);
+    window.open(`https://www.google.com/search?q=${searchQuery}&tbm=isch`, '_blank');
   };
 
   // --- Filtering ---
@@ -473,6 +448,17 @@ export default function App() {
             </button>
           </div>
 
+          <div className="p-6 border-b border-white/5 bg-emerald-600/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-emerald-500/70 uppercase tracking-wider">Statistiche</span>
+              <Info className="w-4 h-4 text-emerald-500/50" />
+            </div>
+            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+              <p className="text-emerald-400 font-black text-3xl">{carModels.length}</p>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-tight mt-1">Totale Modellini</p>
+            </div>
+          </div>
+
           <div className="p-6 flex-1 overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-semibold text-emerald-500/70 uppercase tracking-wider">Marche</h2>
@@ -565,7 +551,11 @@ export default function App() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-3xl font-bold text-emerald-500 drop-shadow-md">La tua Collezione</h1>
-                <p className="text-emerald-200/80 mt-1 drop-shadow-sm">Hai {filteredModels.length} modellini in totale.</p>
+                <p className="text-emerald-200/80 mt-1 drop-shadow-sm">
+                  {selectedBrand || searchTerm 
+                    ? `Mostrati ${filteredModels.length} su ${carModels.length} modellini`
+                    : `Hai ${carModels.length} modellini in totale`}
+                </p>
               </div>
             </div>
 
@@ -832,11 +822,10 @@ export default function App() {
                       <button 
                         type="button"
                         onClick={searchImage}
-                        disabled={isSearchingImage}
-                        className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+                        className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 transition-colors"
                       >
-                        {isSearchingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />}
-                        Cerca con AI
+                        <ImageIcon className="w-3 h-3" />
+                        Cerca con Google
                       </button>
                     </label>
                     <input 
